@@ -5,39 +5,30 @@ import { CreateShapeProps } from "../../types/Props";
 
 const ShapeRetangle = ({
   shapeProps,
-  isSelected,
   onSelect,
   onChange,
 }: CreateShapeProps) => {
   const shapeRef = useRef<Konva.Shape>(null);
-  // const trRef = useRef<Konva.Transformer>(null);
-
-  // React.useEffect(() => {
-  //   if (isSelected && trRef.current) {
-  //     trRef.current.nodes([shapeRef.current!]);
-  //     trRef.current.getLayer()!.batchDraw();
-  //     console.log("selected shape is", shapeRef.current!);
-  //   }
-  // }, [isSelected]);
 
   return (
     <React.Fragment>
       <Rect
-        onMouseDown={(e) => {
-          onSelect(shapeRef.current!);
-          console.log("클릭", shapeRef.current);
+        onMouseDown={(e: React.MouseEvent) => {
+          onSelect(e, shapeRef.current!);
         }}
         ref={shapeRef}
         {...shapeProps}
         draggable
         onDragEnd={(e) => {
+          console.log("x,y", e.target.x(), e.target.y());
           onChange(
             {
               ...shapeProps.attrs,
               x: e.target.x(),
               y: e.target.y(),
             },
-            shapeRef.current!
+            shapeRef.current!,
+            e
           );
         }}
         onTransformEnd={(e) => {
@@ -47,6 +38,7 @@ const ShapeRetangle = ({
 
           node.scaleX(1);
           node.scaleY(1);
+          console.log("new width", Math.max(5, node.width() * scaleX));
           onChange(
             {
               ...shapeProps.attrs,
@@ -55,7 +47,8 @@ const ShapeRetangle = ({
               width: Math.max(5, node.width() * scaleX),
               height: Math.max(node.height() * scaleY),
             },
-            shapeRef.current!
+            shapeRef.current!,
+            e
           );
         }}
       />

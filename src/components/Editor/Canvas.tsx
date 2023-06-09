@@ -14,6 +14,7 @@ import {
   Rect,
   Line,
   Transformer,
+  Group,
 } from "react-konva";
 import Konva from "konva";
 import { ShapesProps } from "../../types/Props";
@@ -35,12 +36,13 @@ import { Shape, ShapeConfig } from "konva/lib/Shape";
 const Canvas = () => {
   const layerRef = useRef<Konva.Layer>(null);
   const trRef = useRef<Konva.Transformer>(null);
-  // const [selectedRef, setSelectedRef] = useRecoilState<Shape<ShapeConfig>[]>(
-  //   selectedShapeRefState
-  // );
-  const [selectedRef, setSelectedRef] = useState<Shape<ShapeConfig>[]>(
-    [] as Shape<ShapeConfig>[]
+  const [selectedRef, setSelectedRef] = useRecoilState<Shape<ShapeConfig>[]>(
+    selectedShapeRefState
   );
+  const [isShifted, setIsShifted] = useState<number>(0);
+  // const [selectedRef, setSelectedRef] = useState<Shape<ShapeConfig>[]>(
+  //   [] as Shape<ShapeConfig>[]
+  // );
   const [selectedShape, setSelectedShape] = useRecoilState(selectedShapeState);
   const [shapes, setShapes] = useRecoilState<Array<ShapesProps>>(shapesState);
 
@@ -55,24 +57,46 @@ const Canvas = () => {
   React.useEffect(() => {
     if (trRef.current) {
       trRef.current.nodes(selectedRef);
-      // const newnodes = selectedShape[0].shape as Node<NodeConfig>;
-      // trRef.current.nodes([newnodes]);
       trRef.current.getLayer()!.batchDraw();
-    }
-    if (
-      shapes.length > 0 &&
-      selectedShape.length > 0 &&
-      selectedShape[0] != null
-    ) {
-      // console.log("current ShapeRef", selectedRef);
-      // console.log("current selected shape", selectedShape);
-      // console.log("current  shape", shapes);
+      console.log("current ShapeRef", selectedRef);
+      console.log("current selected shape", selectedShape);
+      console.log("current  shape", shapes);
     }
   }, [selectedRef, selectedShape, shapes]);
 
-  // console.log(shapeRef.current);
   const canvasWidth = 900;
   const canvasHeight = 500;
+
+  const isSelected = (shape: ShapesProps) => {
+    for (const key of selectedShape) {
+      if (key.shapeid === shape.shapeid) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const isSelectedRef = (ref: Shape<ShapeConfig>) => {
+    return selectedRef.some((selectedRefItem) => selectedRefItem === ref);
+  };
+
+  document.addEventListener("keydown", function (event) {
+    // 키보드 이벤트 핸들러 함수
+    if (event.key === "Shift") {
+      // Enter 키가 눌리고 someCondition이 참일 때만 이벤트 처리
+      // 원하는 작업 수행
+      setIsShifted(1);
+    }
+  });
+
+  document.addEventListener("keyup", function (event) {
+    // 키보드 이벤트 핸들러 함수
+    if (event.key === "Shift") {
+      // Enter 키가 눌리고 someCondition이 참일 때만 이벤트 처리
+      // 원하는 작업 수행
+      setIsShifted(0);
+    }
+  });
 
   return (
     <CanvasContainer>
@@ -89,48 +113,68 @@ const Canvas = () => {
           }}
         >
           <Layer ref={layerRef}>
-            {shapes.map((shape: any) => {
-              const ShapeComponent = shapeComponents[shape.shapetype];
+            {shapes.map((thisshape: any) => {
+              const ShapeComponent = shapeComponents[thisshape.shapetype];
+              console.log("let's go", thisshape);
               if (ShapeComponent) {
                 return (
                   <ShapeComponent
-                    key={shape.shapeid}
-                    shapeProps={shape.shape}
-                    isSelected={shape === selectedShape[0]}
-                    onSelect={(ref: Shape<ShapeConfig>) => {
-                      setSelectedShape([shape]);
-                      setSelectedRef([ref]);
+                    key={thisshape.shapeid}
+                    shapeProps={thisshape.shape}
+                    onSelect={(
+                      e: React.MouseEvent,
+                      ref: Shape<ShapeConfig>
+                    ) => {
+                      if (isShifted) {
+                        setSelectedShape([...selectedShape, thisshape]);
+                        setSelectedRef([...selectedRef, ref]);
+                      } else if (!isSelectedRef(ref)) {
+                        setSelectedShape([thisshape]);
+                        setSelectedRef([ref]);
+                      }
+                      return;
                     }}
-                    onChange={(newAttrs: any, ref: Shape<ShapeConfig>) => {
-                      const updatedShapes = shapes.map((shape: any) => {
-                        if (shape.shapeid === selectedShape[0].shapeid) {
-                          const updateShape = {
-                            ...shape,
-                            shape: { ...shape, attrs: newAttrs },
+                    onChange={(
+                      newAttrs: any,
+                      ref: Shape<ShapeConfig>,
+                      e: MouseEvent
+                    ) => {
+                      const updatedShapes = shapes.map((shp: any) => {
+                        const tgt = e.target as ShapeConfig;
+                        if (
+                          tgt.attrs._id === shp.shape._id &&
+                          isSelectedRef(ref)
+                        ) {
+                          return {
+                            ...shp,
+                            shape: {
+                              ...shp.shape,
+                              attrs: newAttrs,
+                            },
                           };
-                          console.log("updateShape", updateShape);
-                          setSelectedShape([updateShape]);
-                          return updateShape;
                         }
-                        return shape;
+
+                        return shp;
                       });
+                      console.log("updatedShape", updatedShapes);
                       setShapes(updatedShapes);
-                      console.log("updated shapes", updatedShapes);
                     }}
                   />
                 );
               }
               return null;
             })}
-            <Transformer
-              ref={trRef}
-              boundBoxFunc={(oldBox, newBox) => {
-                if (newBox.width < 5 || newBox.height < 5) {
-                  return oldBox;
-                }
-                return newBox;
-              }}
-            />
+            {selectedRef.length > 0 && (
+              <Transformer
+                ref={trRef}
+                boundBoxFunc={(oldBox, newBox) => {
+                  if (newBox.width < 5 || newBox.height < 5) {
+                    return oldBox;
+                  }
+                  return newBox;
+                }}
+              />
+            )}
           </Layer>
         </Stage>
       </CanvasWrapper>

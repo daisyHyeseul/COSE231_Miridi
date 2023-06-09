@@ -17,4 +17,5 @@ export const selectedShapeState = atom<ShapesProps[]>({
 export const selectedShapeRefState = atom<Shape<ShapeConfig>[]>({
   key: "selectedShapeRefState",
   default: [],
+  dangerouslyAllowMutability: true,
 });

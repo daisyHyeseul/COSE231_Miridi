@@ -3,29 +3,14 @@ import React, { useRef } from "react";
 import { Text, Rect, Transformer } from "react-konva";
 import { CreateShapeProps } from "../../types/Props";
 
-const ShapeText = ({
-  shapeProps,
-  isSelected,
-  onSelect,
-  onChange,
-}: CreateShapeProps) => {
+const ShapeText = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
   const shapeRef = useRef<Konva.Shape>(null);
-  // const trRef = useRef< Konva.Transformer>(null);
-
-  // React.useEffect(() => {
-  //     if (isSelected&&trRef.current) {
-  //       trRef.current.nodes([shapeRef.current!]);
-  //       trRef.current.getLayer()!.batchDraw();
-  //       // console.log("selected shape is", shapeProps);
-  //     }
-  //   }, [isSelected]);
 
   return (
     <React.Fragment>
       <Text
-        onMouseDown={(e) => {
-          onSelect(shapeRef.current!);
-          console.log("클릭", shapeRef.current);
+        onMouseDown={(e: React.MouseEvent) => {
+          onSelect(e, shapeRef.current!);
         }}
         ref={shapeRef}
         {...shapeProps}
@@ -37,7 +22,8 @@ const ShapeText = ({
               x: e.target.x(),
               y: e.target.y(),
             },
-            shapeRef.current!
+            shapeRef.current!,
+            e
           );
         }}
         onTransformEnd={(e) => {
@@ -55,7 +41,8 @@ const ShapeText = ({
               width: Math.max(5, node.width() * scaleX),
               height: Math.max(node.height() * scaleY),
             },
-            shapeRef.current!
+            shapeRef.current!,
+            e
           );
         }}
       />

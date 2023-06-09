@@ -14,13 +14,18 @@ export interface CreateShapeBtnProps {
 
 export interface CreateShapeProps {
   shapeProps: any;
-  isSelected: boolean;
-  onSelect: (ref: Shape<ShapeConfig> | null) => void;
-  onChange: (newAttrs: any, ref: Shape<ShapeConfig>) => void;
+  onSelect: (e: React.MouseEvent, ref: Shape<ShapeConfig> | null) => void;
+  onChange: (newAttrs: any, ref: Shape<ShapeConfig>, e: any) => void;
+
   // onDelete: () => void;
 }
 export interface DeleteShapeBtnProps {
   onDelete: (e: React.MouseEvent) => void;
+}
+
+export interface ZorderBtnProps {
+  // onClick: (e: React.MouseEvent) => void;
+  zorder: string;
 }
 
 export interface PropertiesProps {

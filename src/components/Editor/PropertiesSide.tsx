@@ -5,28 +5,30 @@ import { useRecoilState } from "recoil";
 import { PropertiesProps, ShapesProps } from "../../types/Props";
 import Konva from "konva";
 import uuid from "react-uuid";
-import { selectedShapeState, shapesState } from "../../atom";
+import {
+  selectedShapeRefState,
+  selectedShapeState,
+  shapesState,
+} from "../../atom";
 import DeleteShapeBtn from "../Buttons/DeleteShapeBtn";
-import { ShapeConfig } from "konva/lib/Shape";
+import { Shape, ShapeConfig } from "konva/lib/Shape";
+import ZorderBtn from "../Buttons/ZorderBtn";
 
 const PropertiesSide = () => {
   const [shapes, setShapes] = useRecoilState<Array<ShapesProps>>(shapesState);
   const [selectedShape, setSelectedShape] = useRecoilState(selectedShapeState);
-  const [opacityValue, setopacityValue] = useState<number>();
   const [propertiesValue, setPropertiesValue] = useState<ShapeConfig>({});
+  const [selectedRef, setSelectedRef] = useRecoilState<Shape<ShapeConfig>[]>(
+    selectedShapeRefState
+  );
 
   useEffect(() => {
-    if (selectedShape.length > 0 && selectedShape[0].shape != null) {
-      setPropertiesValue(selectedShape[0].shape.attrs);
-    }
-    console.log("properties", propertiesValue);
-    if (
-      shapes.length > 0 &&
-      selectedShape.length > 0 &&
-      selectedShape[0] != null
-    ) {
-      console.log("[b]current selected shape", selectedShape[0].shape.attrs);
-      console.log("[b]current  shape", shapes[0].shape.attrs);
+    if (selectedShape.length == 1) {
+      for (const thisshape of shapes) {
+        if (thisshape.shapeid === selectedShape[0].shapeid) {
+          setPropertiesValue(thisshape.shape.attrs);
+        }
+      }
     }
   }, [shapes, selectedShape]);
 
@@ -37,7 +39,7 @@ const PropertiesSide = () => {
       width: 100,
       height: 100,
       opacity: 1,
-      fill: "lightgrey",
+      fill: Konva.Util.getRandomColor(),
     } as Konva.RectConfig);
     const newRect = {
       shapeid: uuid(),
@@ -54,7 +56,7 @@ const PropertiesSide = () => {
       y: 200,
       radius: 50,
       opacity: 1,
-      fill: "lightgrey",
+      fill: Konva.Util.getRandomColor(),
     } as Konva.CircleConfig);
     const newCirc = {
       shapeid: uuid(),
@@ -69,7 +71,7 @@ const PropertiesSide = () => {
   const onClickLine = (e: React.MouseEvent) => {
     const line = new Konva.Line({
       points: [73, 70, 340, 23],
-      stroke: "red",
+      stroke: Konva.Util.getRandomColor(),
       tension: 1,
       opacity: 1,
     } as Konva.LineConfig);
@@ -90,7 +92,7 @@ const PropertiesSide = () => {
       text: "Simple Text",
       fontSize: 30,
       fontFamily: "Calibri",
-      fill: "green",
+      fill: Konva.Util.getRandomColor(),
       opacity: 1,
     } as Konva.LineConfig);
     const newText = {
@@ -103,16 +105,18 @@ const PropertiesSide = () => {
   };
 
   const changeOpacity = (e: any) => {
-    setopacityValue(e.target.value);
+    setPropertiesValue({ ...propertiesValue, opacity: e.target.value });
     const updatedShapes = shapes.map((shape: any) => {
-      if (shape === selectedShape[0]) {
-        return {
+      if (shape.shapeid === selectedShape[0].shapeid) {
+        const updateShape = {
           ...shape,
           shape: {
-            ...shape.shape,
-            opacity: e.target.value / 100,
+            ...shape,
+            attrs: { ...shape.shape.attrs, opacity: e.target.value / 100 },
           },
         };
+        setSelectedShape([updateShape]);
+        return updateShape;
       }
       return shape;
     });
@@ -122,18 +126,18 @@ const PropertiesSide = () => {
   const onDelete = (e: React.MouseEvent) => {
     setShapes(shapes.filter((shape) => shape != selectedShape[0]));
     setSelectedShape([]);
+    setSelectedRef([]);
   };
 
-  // document.addEventListener("keydown", function (event) {
+  // document.addEventListener("keyup", function (event) {
   //   if (
   //     event.key === "Delete" &&
-  //     selectedShape != null &&
-  //     selectedShape.shape != null
+  //     selectedShape.length > 0 &&
+  //     selectedShape[0].shape != null
   //   ) {
   //     // 삭제 키를 눌렀을 때 실행할 동작을 여기에 작성합니다.
-  //     console.log(selectedShape);
-  //     setShapes(shapes.filter((shape) => shape != selectedShape));
-  //     setSelectedShape(null);
+  //     setShapes(shapes.filter((shape) => shape != selectedShape[0]));
+  //     setSelectedShape([]);
   //     console.log("Delete 키가 눌렸습니다.");
   //   }
   // });
@@ -150,6 +154,9 @@ const PropertiesSide = () => {
       {selectedShape.length > 0 && selectedShape[0].shape != null ? (
         <ShapePropertiesContainer>
           <DeleteShapeBtn onDelete={onDelete} />
+          <ZorderBtn zorder="up" />
+
+          <ZorderBtn zorder="down" />
           <ColorWrapper>
             <label>Color : </label>
             <ColorChip color={propertiesValue.fill} /> :
@@ -177,13 +184,13 @@ const PropertiesSide = () => {
               ? propertiesValue.radius
               : null}
           </div>
-          <div> opacity : {opacityValue}</div>
+          <div> opacity : {propertiesValue.opacity! * 100}</div>
           <input
             type="range"
             min="0"
             max="100"
             step="1"
-            value={opacityValue || ""}
+            value={propertiesValue.opacity! * 100 || ""}
             onChange={changeOpacity}
           />
         </ShapePropertiesContainer>

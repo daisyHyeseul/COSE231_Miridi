@@ -4,54 +4,40 @@ import { Circle, Rect, Transformer } from "react-konva";
 import { CreateShapeProps } from "../../types/Props";
 import { selectedShapeRefState, selectedShapeState } from "../../atom";
 import { useRecoilState } from "recoil";
+import { Shape, ShapeConfig } from "konva/lib/Shape";
 
-const ShapeCircle = ({
-  shapeProps,
-  isSelected,
-  onSelect,
-  onChange,
-}: CreateShapeProps) => {
+const ShapeCircle = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
   const shapeRef = useRef<Konva.Shape>(null);
   // const trRef = useRef<Konva.Transformer>(null);
-
-  React.useEffect(() => {
-    if (isSelected && shapeRef) {
-      // console.log(isSelected);
-      // trRef.current.nodes([shapeRef.current!]);
-      // trRef.current.getLayer()!.batchDraw();
-      // setSelectedRef(shapeRef.current!);
-      // console.log(shapeRef.current);
-      // if (shapeRef) console.log("ref.current", shapeRef.current);
-    }
-  }, [isSelected]);
 
   return (
     <React.Fragment>
       <Circle
-        onMouseDown={(e) => {
-          onSelect(shapeRef.current!);
-          console.log("클릭", shapeRef.current);
+        onMouseDown={(e: React.MouseEvent) => {
+          onSelect(e, shapeRef.current!);
         }}
         ref={shapeRef}
         {...shapeProps}
         draggable
         onDragEnd={(e) => {
+          console.log(e);
+          console.log("x,y", e.target.x(), e.target.y());
           onChange(
             {
               ...shapeProps.attrs,
               x: e.target.x(),
               y: e.target.y(),
             },
-            shapeRef.current!
+            shapeRef.current!,
+            e
           );
         }}
         onTransformEnd={(e) => {
           const node = shapeRef.current!;
           const scaleX = node.scaleX();
           node.scaleY(1);
-
           node.scaleX(1);
-          console.log("지금 반지름", node.width());
+          console.log("new radius", Math.max(5, (node.width() / 2) * scaleX));
           onChange(
             {
               ...shapeProps.attrs,
@@ -59,7 +45,8 @@ const ShapeCircle = ({
               y: node.y(),
               radius: Math.max(5, (node.width() / 2) * scaleX),
             },
-            shapeRef.current!
+            shapeRef.current!,
+            e
           );
         }}
       />
