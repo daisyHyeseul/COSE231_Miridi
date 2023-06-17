@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { useRef } from "react";
 import { Layer, Rect, Stage } from "react-konva";
-import { CreateShapeBtnProps } from "../../types/Props";
+import { CreateShapeBtnProps } from "../../../types/Props";
 import { styled } from "styled-components";
 
 const CreateShapeBtn = ({ shapetype, onClick }: CreateShapeBtnProps) => {
@@ -10,15 +10,15 @@ const CreateShapeBtn = ({ shapetype, onClick }: CreateShapeBtnProps) => {
 export default CreateShapeBtn;
 
 export const CreateShapeButton = styled.button`
-  font-family: var(--font_family_default);
   font-size: 14px;
   height: 32px;
-  padding: 0 10px;
+  padding: 0 15px;
   margin: 0 6px 6px 0;
-  border-radius: 4px;
-  border: solid 1px gray;
+  border-radius: 15px;
+  border: solid 0px gray;
   box-sizing: border-box;
-  background-color: lightgray;
-  color: black;
+  background: #f0f0f0;
+  color: #787878;
   cursor: pointer;
+  font-family: "SCDreamRegular";
 `;

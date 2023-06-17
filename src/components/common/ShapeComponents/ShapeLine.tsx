@@ -1,14 +1,14 @@
 import Konva from "konva";
 import React, { useRef } from "react";
-import { Text, Rect, Transformer } from "react-konva";
-import { CreateShapeProps } from "../../types/Props";
+import { Line } from "react-konva";
+import { CreateShapeProps } from "../../../types/Props";
 
-const ShapeText = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
+const ShapeLine = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
   const shapeRef = useRef<Konva.Shape>(null);
 
   return (
     <React.Fragment>
-      <Text
+      <Line
         onMouseDown={(e: React.MouseEvent) => {
           onSelect(e, shapeRef.current!);
         }}
@@ -46,18 +46,7 @@ const ShapeText = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
           );
         }}
       />
-      {/* {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
-      )} */}
     </React.Fragment>
   );
 };
-export default ShapeText;
+export default ShapeLine;

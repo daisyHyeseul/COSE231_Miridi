@@ -1,5 +1,5 @@
 import { atom, selector } from "recoil";
-import { ShapesProps } from "./types/Props";
+import { ShapesProps } from "../types/Props";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import React from "react";
 import { Node } from "konva/lib/Node";

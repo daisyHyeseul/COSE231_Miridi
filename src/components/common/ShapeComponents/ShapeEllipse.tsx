@@ -1,18 +1,14 @@
 import Konva from "konva";
 import React, { useRef } from "react";
-import { Rect, Transformer } from "react-konva";
-import { CreateShapeProps } from "../../types/Props";
+import { Ellipse } from "react-konva";
+import { CreateShapeProps } from "../../../types/Props";
 
-const ShapeRetangle = ({
-  shapeProps,
-  onSelect,
-  onChange,
-}: CreateShapeProps) => {
+const ShapeEllipse = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
   const shapeRef = useRef<Konva.Shape>(null);
 
   return (
     <React.Fragment>
-      <Rect
+      <Ellipse
         onMouseDown={(e: React.MouseEvent) => {
           onSelect(e, shapeRef.current!);
         }}
@@ -20,7 +16,6 @@ const ShapeRetangle = ({
         {...shapeProps}
         draggable
         onDragEnd={(e) => {
-          console.log("x,y", e.target.x(), e.target.y());
           onChange(
             {
               ...shapeProps.attrs,
@@ -35,35 +30,22 @@ const ShapeRetangle = ({
           const node = shapeRef.current!;
           const scaleX = node.scaleX();
           const scaleY = node.scaleY();
-
-          node.scaleX(1);
           node.scaleY(1);
-          console.log("new width", Math.max(5, node.width() * scaleX));
+          node.scaleX(1);
           onChange(
             {
               ...shapeProps.attrs,
               x: node.x(),
               y: node.y(),
-              width: Math.max(5, node.width() * scaleX),
-              height: Math.max(node.height() * scaleY),
+              radiusX: Math.max(5, (node.width() * scaleX) / 2),
+              radiusY: Math.max((node.height() * scaleY) / 2),
             },
             shapeRef.current!,
             e
           );
         }}
       />
-      {/* {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
-      )} */}
     </React.Fragment>
   );
 };
-export default ShapeRetangle;
+export default ShapeEllipse;

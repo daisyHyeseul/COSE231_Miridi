@@ -1,5 +1,6 @@
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
+import React from "react";
 
 export interface ShapesProps {
   shapeid: string;
@@ -24,16 +25,33 @@ export interface DeleteShapeBtnProps {
 }
 
 export interface ZorderBtnProps {
-  // onClick: (e: React.MouseEvent) => void;
+  onClick: (e: React.MouseEvent) => void;
   zorder: string;
 }
 
-export interface PropertiesProps {
+export interface ColorChipProps {
   color: string;
-  height: number | null;
-  width: number | null;
-  radius: number | null;
-  x: number;
-  y: number;
+  onClick: (e: React.MouseEvent, newColor: string) => void;
+}
+
+export interface PropertyColorProps {
+  onChangeColor: (e: React.MouseEvent, newColor: string) => void;
+  onClick: (e: React.MouseEvent, ispopup: boolean) => void;
+  popupIsOpen: boolean;
+  Color: string;
+}
+
+export interface ColorPopupProps {
+  onChangeColor: (e: React.MouseEvent, newColor: string) => void;
+  onClick: (e: React.MouseEvent, ispopup: boolean) => void;
+}
+
+export interface PropertyOpacityProps {
+  onChangeOpacity: (e: any) => void;
   opacity: number;
+}
+
+export interface PropertyTextProps {
+  property: ShapeConfig;
+  shapeType: string;
 }

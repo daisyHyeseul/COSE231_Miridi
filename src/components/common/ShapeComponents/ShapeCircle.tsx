@@ -1,14 +1,10 @@
 import Konva from "konva";
 import React, { useRef } from "react";
-import { Circle, Rect, Transformer } from "react-konva";
-import { CreateShapeProps } from "../../types/Props";
-import { selectedShapeRefState, selectedShapeState } from "../../atom";
-import { useRecoilState } from "recoil";
-import { Shape, ShapeConfig } from "konva/lib/Shape";
+import { Circle } from "react-konva";
+import { CreateShapeProps } from "../../../types/Props";
 
 const ShapeCircle = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
   const shapeRef = useRef<Konva.Shape>(null);
-  // const trRef = useRef<Konva.Transformer>(null);
 
   return (
     <React.Fragment>
@@ -20,8 +16,6 @@ const ShapeCircle = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
         {...shapeProps}
         draggable
         onDragEnd={(e) => {
-          console.log(e);
-          console.log("x,y", e.target.x(), e.target.y());
           onChange(
             {
               ...shapeProps.attrs,
@@ -37,7 +31,6 @@ const ShapeCircle = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
           const scaleX = node.scaleX();
           node.scaleY(1);
           node.scaleX(1);
-          console.log("new radius", Math.max(5, (node.width() / 2) * scaleX));
           onChange(
             {
               ...shapeProps.attrs,
@@ -50,17 +43,6 @@ const ShapeCircle = ({ shapeProps, onSelect, onChange }: CreateShapeProps) => {
           );
         }}
       />
-      {/* {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) {
-              return oldBox;
-            }
-            return newBox;
-          }}
-        />
-      )} */}
     </React.Fragment>
   );
 };

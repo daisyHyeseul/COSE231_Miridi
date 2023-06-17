@@ -1,37 +1,22 @@
-import React, {
-  LegacyRef,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Stage,
-  Layer,
-  Star,
-  Text,
-  Circle,
-  Rect,
-  Line,
-  Transformer,
-  Group,
-} from "react-konva";
+import React, { useEffect, useRef, useState } from "react";
+import { Stage, Layer, Transformer } from "react-konva";
 import Konva from "konva";
 import { ShapesProps } from "../../types/Props";
-import ShapeRetangle from "../ShapeComponents/ShapeRectangle";
-import ShapeRectangle from "../ShapeComponents/ShapeRectangle";
-import ShapeCircle from "../ShapeComponents/ShapeCircle";
-import ShapeLine from "../ShapeComponents/ShapeLine";
-import ShapeText from "../ShapeComponents/ShapeText";
+import ShapeRectangle from "../common/ShapeComponents/ShapeRectangle";
+import ShapeCircle from "../common/ShapeComponents/ShapeCircle";
+import ShapeLine from "../common/ShapeComponents/ShapeLine";
+import ShapeText from "../common/ShapeComponents/ShapeText";
 import {
   selectedShapeRefState,
   selectedShapeState,
   shapesState,
-} from "../../atom";
+} from "../../stores/atom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { styled } from "styled-components";
-import { Node, NodeConfig } from "konva/lib/Node";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
+import ShapeEllipse from "../common/ShapeComponents/ShapeEllipse";
+import { shapeActions } from "../../stores/ShapeSingleton";
+import { ShiftKeyObserver } from "../../stores/observer";
 
 const Canvas = () => {
   const layerRef = useRef<Konva.Layer>(null);
@@ -39,64 +24,50 @@ const Canvas = () => {
   const [selectedRef, setSelectedRef] = useRecoilState<Shape<ShapeConfig>[]>(
     selectedShapeRefState
   );
-  const [isShifted, setIsShifted] = useState<number>(0);
-  // const [selectedRef, setSelectedRef] = useState<Shape<ShapeConfig>[]>(
-  //   [] as Shape<ShapeConfig>[]
-  // );
+  const [isShifted, setIsShifted] = useState<boolean>(false);
   const [selectedShape, setSelectedShape] = useRecoilState(selectedShapeState);
   const [shapes, setShapes] = useRecoilState<Array<ShapesProps>>(shapesState);
+
+  let newShapes = useRecoilValue(shapesState);
+
+  const { addObserver, removeObserver } = ShiftKeyObserver();
+  const handleShiftKey = (value: boolean) => {
+    setIsShifted(value);
+  };
+  useEffect(() => {
+    addObserver({ update: handleShiftKey });
+
+    return () => {
+      removeObserver({ update: handleShiftKey });
+    };
+  }, [addObserver, removeObserver]);
+
+  // const [shapes, setShapes] = useState<ShapesProps[]>();
+  // useEffect(() => {
+  //   setShapes(shapeActions.getShape());
+  // }, [shapes]);
 
   const shapeComponents: any = {
     RECTANGLE: ShapeRectangle,
     CIRCLE: ShapeCircle,
     LINE: ShapeLine,
     TEXT: ShapeText,
-    // Add more shape types and components as needed
+    ELLIPSE: ShapeEllipse,
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (trRef.current) {
       trRef.current.nodes(selectedRef);
       trRef.current.getLayer()!.batchDraw();
-      console.log("current ShapeRef", selectedRef);
-      console.log("current selected shape", selectedShape);
-      console.log("current  shape", shapes);
     }
   }, [selectedRef, selectedShape, shapes]);
 
   const canvasWidth = 900;
   const canvasHeight = 500;
 
-  const isSelected = (shape: ShapesProps) => {
-    for (const key of selectedShape) {
-      if (key.shapeid === shape.shapeid) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   const isSelectedRef = (ref: Shape<ShapeConfig>) => {
     return selectedRef.some((selectedRefItem) => selectedRefItem === ref);
   };
-
-  document.addEventListener("keydown", function (event) {
-    // 키보드 이벤트 핸들러 함수
-    if (event.key === "Shift") {
-      // Enter 키가 눌리고 someCondition이 참일 때만 이벤트 처리
-      // 원하는 작업 수행
-      setIsShifted(1);
-    }
-  });
-
-  document.addEventListener("keyup", function (event) {
-    // 키보드 이벤트 핸들러 함수
-    if (event.key === "Shift") {
-      // Enter 키가 눌리고 someCondition이 참일 때만 이벤트 처리
-      // 원하는 작업 수행
-      setIsShifted(0);
-    }
-  });
 
   return (
     <CanvasContainer>
@@ -113,9 +84,8 @@ const Canvas = () => {
           }}
         >
           <Layer ref={layerRef}>
-            {shapes.map((thisshape: any) => {
+            {shapes!.map((thisshape: any, index) => {
               const ShapeComponent = shapeComponents[thisshape.shapetype];
-              console.log("let's go", thisshape);
               if (ShapeComponent) {
                 return (
                   <ShapeComponent
@@ -139,31 +109,30 @@ const Canvas = () => {
                       ref: Shape<ShapeConfig>,
                       e: MouseEvent
                     ) => {
-                      const updatedShapes = shapes.map((shp: any) => {
-                        const tgt = e.target as ShapeConfig;
-                        if (
-                          tgt.attrs._id === shp.shape._id &&
-                          isSelectedRef(ref)
-                        ) {
-                          return {
-                            ...shp,
-                            shape: {
-                              ...shp.shape,
-                              attrs: newAttrs,
-                            },
-                          };
+                      const updatedShapes = newShapes.map(
+                        (shp: any, index2) => {
+                          if (index == index2) {
+                            return {
+                              ...shp,
+                              shape: {
+                                ...shp.shape,
+                                attrs: newAttrs,
+                              },
+                            };
+                          }
+                          return shp;
                         }
-
-                        return shp;
-                      });
-                      console.log("updatedShape", updatedShapes);
-                      setShapes(updatedShapes);
+                      );
+                      newShapes = updatedShapes;
+                      setShapes(newShapes);
+                      shapeActions.updateShape(newShapes);
                     }}
                   />
                 );
               }
               return null;
             })}
+
             {selectedRef.length > 0 && (
               <Transformer
                 ref={trRef}

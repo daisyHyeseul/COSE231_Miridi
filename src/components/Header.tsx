@@ -1,21 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
 
 const Header = () => {
-    return (
-      <HeaderContainer>
-        <HeaderWrapper>
-            <HeaderTitle>
-               Vector Graphic Editor
-            </HeaderTitle>
-        </HeaderWrapper>
-      </HeaderContainer>
-    );
-  };
-  
-  export default Header;
+  return (
+    <HeaderContainer>
+      <HeaderWrapper>
+        <HeaderTitle>소정이의 그래픽 에디터</HeaderTitle>
+      </HeaderWrapper>
+    </HeaderContainer>
+  );
+};
 
+export default Header;
 
 export const HeaderContainer = styled.div`
   display: flex;
@@ -29,7 +25,7 @@ export const HeaderWrapper = styled.div`
   align-items: center;
   box-sizing: border-box;
   justify-content: space-between;
-  padding : 10px;
+  padding: 10px;
   background-color: white;
   border-bottom: 2px solid lightgray;
   position: fixed;
@@ -38,8 +34,9 @@ export const HeaderWrapper = styled.div`
 
 export const HeaderTitle = styled.div`
   font-size: 28px;
-  color: #919191;
-  font-family: 'SCDreamBold';
+  color: #22cc88;
+  font-family: "SCDreamBold";
+
   :hover {
     color: #1d1d1d;
     transition: 1s;
